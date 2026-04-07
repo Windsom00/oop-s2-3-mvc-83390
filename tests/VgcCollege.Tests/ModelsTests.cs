@@ -881,7 +881,7 @@ public class GradebookViewModelTests
 
 public static class ModelValidator
 {
-    public static List<ValidationResult> ModelValidator.ValidateModel(object model)
+    public static List<ValidationResult> ValidateModel(object model)
     {
         var results = new List<ValidationResult>();
         var ctx = new ValidationContext(model);
