@@ -2,18 +2,27 @@ name: ci
 
 on:
   push:
-    branches: ["main"]
+    branches: ["master"]
   pull_request:
-    branches: ["main"]
+    branches: ["master"]
   workflow_dispatch:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  TEST_PROJECT: "tests/VgcCollege.Tests/VgcCollege.Tests.csproj"
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
   build-test-publish:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -29,13 +38,40 @@ jobs:
       - name: Build
         run: dotnet build --configuration Release --no-restore -p:WarningsAsErrors=false
 
-      - name: Test
-        run: dotnet test tests/VgcCollege.Tests/VgcCollege.Tests.csproj --configuration Release --no-build -p:WarningsAsErrors=false
+      - name: Test + collect coverage
+        run: >
+          dotnet test ${{ env.TEST_PROJECT }}
+          --configuration Release --no-build
+          -p:WarningsAsErrors=false
+          --collect:"XPlat Code Coverage"
+          --logger "trx;LogFileName=test-results.trx"
+
+      - name: Install ReportGenerator
+        run: dotnet tool install -g dotnet-reportgenerator-globaltool
+
+      - name: Generate HTML coverage report
+        run: |
+          export PATH="$PATH:~/.dotnet/tools"
+          reportgenerator \
+            -reports:**/coverage.cobertura.xml \
+            -targetdir:coveragereport \
+            -reporttypes:Html
+
+      - name: Upload coverage as build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-html
+          path: coveragereport
+
+      - name: Upload Pages artifact
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./coveragereport
 
       - name: Publish
-        run: dotnet publish --configuration Release --output ./publish
-
-      - name: Upload artifact
+        run: dotnet publish src/VgcCollege.Web/VgcCollege.Web.csproj --configuration Release --output ./publish
+      - name: Upload app artifact
         uses: actions/upload-artifact@v4
         with:
           name: app
@@ -44,7 +80,6 @@ jobs:
   deploy:
     needs: build-test-publish
     runs-on: ubuntu-latest
-
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
@@ -54,3 +89,15 @@ jobs:
 
       - name: Deploy
         run: echo "Deploy step"
+
+  deploy-pages:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    needs: build-test-publish
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy coverage report to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
