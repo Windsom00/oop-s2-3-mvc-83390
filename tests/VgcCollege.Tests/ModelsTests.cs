@@ -32,7 +32,7 @@ public class BranchTests
     public void Branch_NameRequired_ValidationFails_WhenEmpty()
     {
         var branch = new Branch { Name = "", Address = "123 St" };
-        var results = ValidateModel(branch);
+        var results = ModelValidator.ValidateModel(branch);
         Assert.Contains(results, r => r.MemberNames.Contains("Name"));
     }
 
@@ -40,7 +40,7 @@ public class BranchTests
     public void Branch_AddressRequired_ValidationFails_WhenEmpty()
     {
         var branch = new Branch { Name = "Science", Address = "" };
-        var results = ValidateModel(branch);
+        var results = ModelValidator.ValidateModel(branch);
         Assert.Contains(results, r => r.MemberNames.Contains("Address"));
     }
 
@@ -48,7 +48,7 @@ public class BranchTests
     public void Branch_NameTooLong_ValidationFails()
     {
         var branch = new Branch { Name = new string('A', 101), Address = "Valid Address" };
-        var results = ValidateModel(branch);
+        var results = ModelValidator.ValidateModel(branch);
         Assert.Contains(results, r => r.MemberNames.Contains("Name"));
     }
 
@@ -95,7 +95,7 @@ public class CourseTests
     public void Course_NameRequired_ValidationFails_WhenEmpty()
     {
         var course = new Course { Name = "" };
-        var results = ValidateModel(course);
+        var results = ModelValidator.ValidateModel(course);
         Assert.Contains(results, r => r.MemberNames.Contains("Name"));
     }
 
@@ -103,7 +103,7 @@ public class CourseTests
     public void Course_NameTooLong_ValidationFails()
     {
         var course = new Course { Name = new string('A', 151) };
-        var results = ValidateModel(course);
+        var results = ModelValidator.ValidateModel(course);
         Assert.Contains(results, r => r.MemberNames.Contains("Name"));
     }
 
@@ -111,7 +111,7 @@ public class CourseTests
     public void Course_ValidName_PassesValidation()
     {
         var course = new Course { Name = "Physics" };
-        var results = ValidateModel(course);
+        var results = ModelValidator.ValidateModel(course);
         Assert.DoesNotContain(results, r => r.MemberNames.Contains("Name"));
     }
 }
@@ -166,7 +166,7 @@ public class StudentProfileTests
     public void StudentProfile_NameRequired_ValidationFails_WhenEmpty()
     {
         var profile = new StudentProfile { Name = "", Email = "a@b.com", StudentNumber = "S1", IdentityUserId = "u1" };
-        var results = ValidateModel(profile);
+        var results = ModelValidator.ValidateModel(profile);
         Assert.Contains(results, r => r.MemberNames.Contains("Name"));
     }
 
@@ -174,7 +174,7 @@ public class StudentProfileTests
     public void StudentProfile_InvalidEmail_ValidationFails()
     {
         var profile = new StudentProfile { Name = "Alice", Email = "not-an-email", StudentNumber = "S1", IdentityUserId = "u1" };
-        var results = ValidateModel(profile);
+        var results = ModelValidator.ValidateModel(profile);
         Assert.Contains(results, r => r.MemberNames.Contains("Email"));
     }
 
@@ -182,7 +182,7 @@ public class StudentProfileTests
     public void StudentProfile_ValidEmail_PassesValidation()
     {
         var profile = new StudentProfile { Name = "Alice", Email = "alice@college.ie", StudentNumber = "S1", IdentityUserId = "u1" };
-        var results = ValidateModel(profile);
+        var results = ModelValidator.ValidateModel(profile);
         Assert.DoesNotContain(results, r => r.MemberNames.Contains("Email"));
     }
 
@@ -190,7 +190,7 @@ public class StudentProfileTests
     public void StudentProfile_StudentNumberTooLong_ValidationFails()
     {
         var profile = new StudentProfile { Name = "Alice", Email = "a@b.com", StudentNumber = new string('S', 21), IdentityUserId = "u1" };
-        var results = ValidateModel(profile);
+        var results = ModelValidator.ValidateModel(profile);
         Assert.Contains(results, r => r.MemberNames.Contains("StudentNumber"));
     }
 
@@ -198,7 +198,7 @@ public class StudentProfileTests
     public void StudentProfile_NameTooLong_ValidationFails()
     {
         var profile = new StudentProfile { Name = new string('A', 101), Email = "a@b.com", StudentNumber = "S1", IdentityUserId = "u1" };
-        var results = ValidateModel(profile);
+        var results = ModelValidator.ValidateModel(profile);
         Assert.Contains(results, r => r.MemberNames.Contains("Name"));
     }
 }
@@ -242,7 +242,7 @@ public class FacultyProfileTests
     public void FacultyProfile_InvalidEmail_ValidationFails()
     {
         var faculty = new FacultyProfile { Name = "Dr. Brown", Email = "invalid", IdentityUserId = "u1" };
-        var results = ValidateModel(faculty);
+        var results = ModelValidator.ValidateModel(faculty);
         Assert.Contains(results, r => r.MemberNames.Contains("Email"));
     }
 
@@ -250,7 +250,7 @@ public class FacultyProfileTests
     public void FacultyProfile_NameTooLong_ValidationFails()
     {
         var faculty = new FacultyProfile { Name = new string('A', 101), Email = "a@b.com", IdentityUserId = "u1" };
-        var results = ValidateModel(faculty);
+        var results = ModelValidator.ValidateModel(faculty);
         Assert.Contains(results, r => r.MemberNames.Contains("Name"));
     }
 
@@ -258,7 +258,7 @@ public class FacultyProfileTests
     public void FacultyProfile_ValidModel_PassesValidation()
     {
         var faculty = new FacultyProfile { Name = "Dr. Green", Email = "green@college.ie", IdentityUserId = "u2" };
-        var results = ValidateModel(faculty);
+        var results = ModelValidator.ValidateModel(faculty);
         Assert.Empty(results);
     }
 }
@@ -400,7 +400,7 @@ public class AssignmentTests
     public void Assignment_TitleRequired_ValidationFails_WhenEmpty()
     {
         var assignment = new Assignment { Title = "" };
-        var results = ValidateModel(assignment);
+        var results = ModelValidator.ValidateModel(assignment);
         Assert.Contains(results, r => r.MemberNames.Contains("Title"));
     }
 
@@ -408,7 +408,7 @@ public class AssignmentTests
     public void Assignment_TitleTooLong_ValidationFails()
     {
         var assignment = new Assignment { Title = new string('A', 201) };
-        var results = ValidateModel(assignment);
+        var results = ModelValidator.ValidateModel(assignment);
         Assert.Contains(results, r => r.MemberNames.Contains("Title"));
     }
 
@@ -416,7 +416,7 @@ public class AssignmentTests
     public void Assignment_ValidTitle_PassesValidation()
     {
         var assignment = new Assignment { Title = "Midterm Essay" };
-        var results = ValidateModel(assignment);
+        var results = ModelValidator.ValidateModel(assignment);
         Assert.DoesNotContain(results, r => r.MemberNames.Contains("Title"));
     }
 }
@@ -457,7 +457,7 @@ public class AssignmentResultTests
     public void AssignmentResult_FeedbackTooLong_ValidationFails()
     {
         var result = new AssignmentResult { Score = 50, Feedback = new string('A', 501) };
-        var results = ValidateModel(result);
+        var results = ModelValidator.ValidateModel(result);
         Assert.Contains(results, r => r.MemberNames.Contains("Feedback"));
     }
 
@@ -465,7 +465,7 @@ public class AssignmentResultTests
     public void AssignmentResult_NullFeedback_PassesValidation()
     {
         var result = new AssignmentResult { Score = 50, Feedback = null };
-        var results = ValidateModel(result);
+        var results = ModelValidator.ValidateModel(result);
         Assert.DoesNotContain(results, r => r.MemberNames.Contains("Feedback"));
     }
 }
@@ -512,7 +512,7 @@ public class ExamTests
     public void Exam_TitleRequired_ValidationFails_WhenEmpty()
     {
         var exam = new Exam { Title = "" };
-        var results = ValidateModel(exam);
+        var results = ModelValidator.ValidateModel(exam);
         Assert.Contains(results, r => r.MemberNames.Contains("Title"));
     }
 
@@ -520,7 +520,7 @@ public class ExamTests
     public void Exam_TitleTooLong_ValidationFails()
     {
         var exam = new Exam { Title = new string('A', 201) };
-        var results = ValidateModel(exam);
+        var results = ModelValidator.ValidateModel(exam);
         Assert.Contains(results, r => r.MemberNames.Contains("Title"));
     }
 
@@ -571,7 +571,7 @@ public class ExamResultTests
     public void ExamResult_GradeTooLong_ValidationFails()
     {
         var result = new ExamResult { Score = 90, Grade = "A+++++" };
-        var results = ValidateModel(result);
+        var results = ModelValidator.ValidateModel(result);
         Assert.Contains(results, r => r.MemberNames.Contains("Grade"));
     }
 
@@ -579,7 +579,7 @@ public class ExamResultTests
     public void ExamResult_NullGrade_PassesValidation()
     {
         var result = new ExamResult { Score = 90, Grade = null };
-        var results = ValidateModel(result);
+        var results = ModelValidator.ValidateModel(result);
         Assert.DoesNotContain(results, r => r.MemberNames.Contains("Grade"));
     }
 }
@@ -879,9 +879,9 @@ public class GradebookViewModelTests
 
 // ─── Helper ───────────────────────────────────────────────────────────────────
 
-file static class ValidateModelExtensions
+public static class ModelValidator
 {
-    public static List<ValidationResult> ValidateModel(object model)
+    public static List<ValidationResult> ModelValidator.ValidateModel(object model)
     {
         var results = new List<ValidationResult>();
         var ctx = new ValidationContext(model);
