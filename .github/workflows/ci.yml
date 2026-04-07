@@ -1,4 +1,5 @@
 name: ci
+
 on:
   push:
     branches: ["main"]
@@ -6,69 +7,50 @@ on:
     branches: ["main"]
   workflow_dispatch:
 
-concurrency:
-  group: "pages"
-  cancel-in-progress: true
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-  DOTNET_VERSION: "10.0.x"
-  TEST_PROJECT: "tests/VgcCollege.Tests/VgcCollege.Tests.csproj"
 
 jobs:
   build-test-publish:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
+          dotnet-version: "10.0.x"
+
       - name: Restore
         run: dotnet restore -p:WarningsAsErrors=false
+
       - name: Build
         run: dotnet build --configuration Release --no-restore -p:WarningsAsErrors=false
-      - name: Test and collect coverage
-        run: >
-          dotnet test ${{ env.TEST_PROJECT }} -c Release --no-build
-          -p:WarningsAsErrors=false
-          --collect:"XPlat Code Coverage"
-          --results-directory ./coverage
-          --logger "trx;LogFileName=test-results.trx"
-      - name: Install ReportGenerator
-        run: dotnet tool install -g dotnet-reportgenerator-globaltool
-      - name: Generate HTML coverage report
-        run: |
-          export PATH="$PATH:~/.dotnet/tools"
-          reportgenerator \
-            -reports:./coverage/**/coverage.cobertura.xml \
-            -targetdir:coveragereport \
-            -reporttypes:Html
-      - name: Upload coverage as build artifact
+
+      - name: Test
+        run: dotnet test tests/VgcCollege.Tests/VgcCollege.Tests.csproj --configuration Release --no-build -p:WarningsAsErrors=false
+
+      - name: Publish
+        run: dotnet publish --configuration Release --output ./publish
+
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-html
-          path: coveragereport
-      - name: Upload Pages artifact
-        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./coveragereport
+          name: app
+          path: ./publish
 
   deploy:
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     needs: build-test-publish
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app
+          path: ./publish
+
+      - name: Deploy
+        run: echo "Deploy step"
