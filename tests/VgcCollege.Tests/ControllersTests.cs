@@ -384,7 +384,7 @@ public class EnrolmentsControllerTests
             StudentProfileId = student.Id,
             CourseId = course.Id,
             EnrolDate = DateTime.Today,
-            Status = "Active"
+            Status = EnrolmentStatus.Active,
         };
         ctx.CourseEnrolments.Add(enrolment);
         await ctx.SaveChangesAsync();
@@ -398,7 +398,7 @@ public class EnrolmentsControllerTests
         var result = await controller.Edit(enrolment.Id, new CourseEnrolment
         {
             Id = enrolment.Id,
-            Status = "Completed",
+            Status = EnrolmentStatus.Completed,
             EnrolDate = DateTime.Today
         });
 
